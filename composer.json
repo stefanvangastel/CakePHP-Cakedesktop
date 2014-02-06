@@ -1,0 +1,15 @@
+{
+    "name": "stefanvangastel/windesktop",
+    "description": "Export your entire CakePHP webapplication to a standalone Windows desktop application (.exe)",
+    "license": "MIT",
+    "type": "cakephp-plugin",
+    "authors": [
+        {
+            "name": "Stefan van Gastel",
+            "email": "stefanvangastel@gmail.com"
+        }
+    ],
+    "require": {
+        "composer/installers": "*"
+    }
+}
