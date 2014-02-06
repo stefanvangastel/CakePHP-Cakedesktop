@@ -227,6 +227,7 @@ class DesktopController extends WindesktopAppController {
 		Database.php
 		 */		
 		$newdatabasefile = <<<EOD
+<?php
 class DATABASE_CONFIG {
 
 	public \$default = array(
@@ -237,6 +238,7 @@ class DATABASE_CONFIG {
 		'database' => '$databasename'
 	);
 }
+?>
 EOD;
 
 		file_put_contents($configdir.'database.php', $newdatabasefile );
