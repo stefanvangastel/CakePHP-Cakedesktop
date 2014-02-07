@@ -2,13 +2,13 @@
 /**
  * Class DesktopController
  */
-App::uses('WindesktopAppController', 'Windesktop.Controller');
+App::uses('CakedesktopAppController', 'Cakedesktop.Controller');
 App::uses('Folder', 'Utility');
 App::uses('File', 'Utility');
 
-class WindesktopController extends AppController {
+class CakedesktopController extends AppController {
 	
-	public $uses = array('Windesktop.Database');
+	public $uses = array('Cakedesktop.Database');
 
 	//Variables
 	private $job_id 		= '';
@@ -25,7 +25,7 @@ class WindesktopController extends AppController {
 	 * Index function, redirect to avoid using routes
 	 */
 	public function index(){
-		$this->redirect(array('plugin'=>'windesktop','controller'=>'windesktop','action'=>'options'));
+		$this->redirect(array('plugin'=>'cakedesktop','controller'=>'cakedesktop','action'=>'options'));
 	}
 
 	/**
@@ -70,7 +70,7 @@ class WindesktopController extends AppController {
 		//$this->job_id = '1234'; //DEV TMP
 
 		//Create job directory
-		$this->job_directory = CakePlugin::path('Windesktop').'tmp'.DS.$this->job_id;		
+		$this->job_directory = CakePlugin::path('Cakedesktop').'tmp'.DS.$this->job_id;		
 		mkdir($this->job_directory);
 
 		//Step 1
@@ -135,10 +135,10 @@ class WindesktopController extends AppController {
 
 		$folder = new Folder($this->job_directory);
 		return $folder->copy(array(
-		    'from' => CakePlugin::path('Windesktop').'Vendor'.DS.'phpdesktop', // will cause a cd() to occur
+		    'from' => CakePlugin::path('Cakedesktop').'Vendor'.DS.'phpdesktop', // will cause a cd() to occur
 		    'to' => $this->job_directory,
 		    'mode' => 0755,
-		    'skip' => array('Windesktop', '.git'),
+		    'skip' => array('Cakedesktop', '.git'),
 		    'scheme' => Folder::SKIP  // Skip directories/files that already exist
 		));
 
@@ -155,7 +155,7 @@ class WindesktopController extends AppController {
 		    'from' => ROOT, // will cause a cd() to occur
 		    'to' => $this->job_directory.DS.'www',
 		    'mode' => 0755,
-		    'skip' => array('Windesktop', '.git'),
+		    'skip' => array('Cakedesktop', '.git'),
 		    'scheme' => Folder::OVERWRITE  // Skip directories/files that already exist
 		));
 		
@@ -211,7 +211,7 @@ class WindesktopController extends AppController {
 		$bootstrapfile = file_get_contents($configdir.'bootstrap.php');
 		
 			//Remove this plugin
-			$bootstrapfile = str_replace("CakePlugin::load('Windesktop');","",$bootstrapfile);
+			$bootstrapfile = str_replace("CakePlugin::load('Cakedesktop');","",$bootstrapfile);
 
 		//Rewrite the file:
 		file_put_contents($configdir.'bootstrap.php', $bootstrapfile);
@@ -303,7 +303,7 @@ EOD;
 	 */
 	private function zipapplication(){
 
-		$this->zipfile = CakePlugin::path('Windesktop').'tmp'.DS.'desktopapplication.zip';
+		$this->zipfile = CakePlugin::path('Cakedesktop').'tmp'.DS.'desktopapplication.zip';
 
 		//Cleanup:
 		if(file_exists($this->zipfile) ){

@@ -1,5 +1,5 @@
 {
-    "name": "stefanvangastel/windesktop",
+    "name": "stefanvangastel/cakedesktop",
     "description": "Export your entire CakePHP webapplication to a standalone Windows desktop application (.exe)",
     "license": "MIT",
     "type": "cakephp-plugin",
