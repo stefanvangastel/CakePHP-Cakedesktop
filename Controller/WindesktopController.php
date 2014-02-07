@@ -3,18 +3,38 @@
  * Class DesktopController
  */
 App::uses('WindesktopAppController', 'Windesktop.Controller');
+App::uses('Folder', 'Utility');
+App::uses('File', 'Utility');
 
-class DesktopController extends WindesktopAppController {
+class WindesktopController extends AppController {
 	
 	public $uses = array('Windesktop.Database');
 
-	private $job_id = '';
+	//Variables
+	private $job_id 		= '';
 
-	private $job_directory = '';
+	private $job_directory 	= '';
 
-	private $sql = '';
+	private $sql 			= '';
 
-	private $databasename = '';
+	private $databasename 	= '';
+
+	private $zipfile 		= '';
+
+	/**
+	 * Index function, redirect to avoid using routes
+	 */
+	public function index(){
+		$this->redirect(array('plugin'=>'windesktop','controller'=>'windesktop','action'=>'options'));
+	}
+
+	/**
+	 * [options description]
+	 * @return [type] [description]
+	 */
+	public function options(){
+		//Render options view
+	}
 
 	/**
 	 * Creates a desktop app of the current CakePHP application
@@ -24,6 +44,8 @@ class DesktopController extends WindesktopAppController {
 		/**
 		 * Steps:
 		 *
+		 * 0. Retrieve options
+		 * 
 		 * 1. Copy phpdesktop skeleton dir to /tmp/<rand>
 		 * 2. Copy entire CakePHP directory to /tmp/<rand>/www/
 		 * 3. Remove .htaccess files
@@ -34,9 +56,9 @@ class DesktopController extends WindesktopAppController {
 		 * 7. Edit database.php to activate Sqlite
 		 * 8. Import database structure in Sqlite
 		 *
-		 * x. Zip package
-		 * x. Cleanup job dir
-		 * x. Serve package
+		 * 9. Zip package
+		 * 10. Cleanup job dir
+		 * 11. Serve package
 		 */
 		
 		//Set values:
@@ -93,13 +115,16 @@ class DesktopController extends WindesktopAppController {
 
 		//Step 9
 		$this->timerstart();
-			$zipfile = $this->zipapplication();
+			$this->zipapplication();
 		$this->timerstop("9. Zip application"); 
 
+		//Step 10
+		$this->timerstart();
+			$this->cleanup();
+		$this->timerstop("10. Cleanup"); 
 
-		//TMP Cleanup
-		$this->rrmdir($this->job_directory);
-		exit;
+		//Step 11
+		return $this->servezipfile();
 	}
 
 	/**
@@ -108,10 +133,15 @@ class DesktopController extends WindesktopAppController {
 	 */
 	private function copyskeletondir(){
 
-		//phpdesktop directory
-		$source = CakePlugin::path('Windesktop').'Vendor'.DS.'phpdesktop';
+		$folder = new Folder($this->job_directory);
+		return $folder->copy(array(
+		    'from' => CakePlugin::path('Windesktop').'Vendor'.DS.'phpdesktop', // will cause a cd() to occur
+		    'to' => $this->job_directory,
+		    'mode' => 0755,
+		    'skip' => array('Windesktop', '.git'),
+		    'scheme' => Folder::SKIP  // Skip directories/files that already exist
+		));
 
-		return $this->xcopy($source, $this->job_directory);
 	}
 
 	/**
@@ -120,10 +150,15 @@ class DesktopController extends WindesktopAppController {
 	 */
 	private function copycakedir(){
 
-		//phpdesktop directory
-		$source = CakePlugin::path('Windesktop').'Vendor'.DS.'phpdesktop';
-
-		return $this->xcopy(ROOT, $this->job_directory.DS.'www', 0755, array('Windesktop')); //Exclude this plugin dir
+		$folder = new Folder($this->job_directory);
+		return $folder->copy(array(
+		    'from' => ROOT, // will cause a cd() to occur
+		    'to' => $this->job_directory.DS.'www',
+		    'mode' => 0755,
+		    'skip' => array('Windesktop', '.git'),
+		    'scheme' => Folder::OVERWRITE  // Skip directories/files that already exist
+		));
+		
 	}
 
 	/**
@@ -268,17 +303,88 @@ EOD;
 	 */
 	private function zipapplication(){
 
-		$zipfile = CakePlugin::path('Windesktop').'tmp'.DS.'desktopapplication.zip';
+		$this->zipfile = CakePlugin::path('Windesktop').'tmp'.DS.'desktopapplication.zip';
 
 		//Cleanup:
-		if(file_exists($zipfile) ){
-			unlink($zipfile);
+		if(file_exists($this->zipfile) ){
+			unlink($this->zipfile);
 		}
 
-		$this->createzip($this->job_directory.DS,$zipfile);
+		$source 		= $this->job_directory.DS;
+		$destination 	= $this->zipfile;
 
-		return $zipfile;
+		 if (!extension_loaded('zip') || !file_exists($source)) {
+	        return false;
+	    }
+
+	    $zip = new ZipArchive();
+	    if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
+	        return false;
+	    }
+
+	    //$source = str_replace('\\', '/', realpath($source));
+
+	    if (is_dir($source) === true)
+	    {
+	        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+
+	        foreach ($files as $file)
+	        {
+	            $file = str_replace('\\', '/', $file);
+
+	            // Ignore "." and ".." folders
+	            if( in_array(substr($file, strrpos($file, DS)+1), array('.', '..')) )
+	                continue;
+
+	            $file = realpath($file);
+
+	            if (is_dir($file) === true)
+	            {
+	                $zip->addEmptyDir(str_replace($source, '', $file . DS));
+	            	//echo str_replace($source . '/', '', $file . '/')."<br />";
+	            }
+	            else if (is_file($file) === true)
+	            {
+	                //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+	                $zip->addFile($file, str_replace($source, '', $file));
+	                //echo str_replace($source . '/', '', $file)."<br />";
+	            }
+	        }
+	    }
+	    else if (is_file($source) === true)
+	    {
+	       $zip->addFromString(basename($source), file_get_contents($source));
+	       //echo $source."<br />";
+	    }
+
+	    return $zip->close();
 	}
+
+	/**
+	 * [cleanup description]
+	 * @return [type] [description]
+	 */
+	private function cleanup(){
+
+		$folder = new Folder($this->job_directory);
+		return $folder->delete();
+	}
+
+	/**
+	 * [cleanup description]
+	 * @return [type] [description]
+	 */
+	public function servezipfile(){
+
+		$this->response->file(
+		    $this->zipfile,
+		    array('download' => true, 'name' => 'desktopapplication.zip')
+		);
+
+
+		return $this->response;
+	}
+
 
 
 
@@ -297,7 +403,6 @@ EOD;
 		$time = time() - $this->starttime;
 
 		echo "<pre>$msg | Time: $time s</pre>";
-		flush();
 	}
 	
 }
