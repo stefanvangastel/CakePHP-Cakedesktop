@@ -38,6 +38,29 @@ class CakedesktopController extends AppController {
 	 */
 	public function options(){
 		//Render options view
+		
+		//Check deps:
+		if( ! extension_loaded('sqlite3') ){
+			$this->Session->setFlash(__('Cakedesktop requires Sqlite3 to be installed.'));
+			$this->redirect($this->referer());
+		}
+
+	/*	if( is_readable(CAKE.'version.txt') ){
+			$versionfile = file(CAKE.'version.txt');
+			$version = $versionfile[count($versionfile)-1];
+
+			$version = "5.1.3";
+
+			list($major,$minor,$patch) = explode('.', $version);
+
+			if(! ($major.'.'.$minor >= 2.3 ) ){
+				$this->Session->setFlash(__('Warning: You appear to be using CakePHP %s.%s . CakePHP >= 2.3 is required.',$major,$minor));
+			}
+
+		}else{
+			$this->Session->setFlash(__('Warning: Could not determine CakePHP version. CakePHP >= 2.3 is required.'));
+		}*/
+
 	}
 
 	/**
@@ -150,9 +173,6 @@ class CakedesktopController extends AppController {
 
 		//Rework settings:
 		$this->settings = $this->fixboolean($this->settings);
-
-		var_dump($this->settings);
-		exit;
 
 		//Rename application exe to title if avail
 		if( ! empty($this->applicationname)){
