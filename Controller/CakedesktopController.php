@@ -11,6 +11,10 @@ class CakedesktopController extends AppController {
 	public $uses = array('Cakedesktop.Database');
 
 	//Variables
+	private $settings		= array();
+
+	private $applicationname= 'cakedesktop_application';
+	
 	private $job_id 		= '';
 
 	private $job_directory 	= '';
@@ -44,22 +48,40 @@ class CakedesktopController extends AppController {
 		/**
 		 * Steps:
 		 *
-		 * 0. Retrieve options
+		 * 0. Retrieve options and verify post 
 		 * 
 		 * 1. Copy phpdesktop skeleton dir to /tmp/<rand>
-		 * 2. Copy entire CakePHP directory to /tmp/<rand>/www/
-		 * 3. Remove .htaccess files
-		 * 4. Edit core.php and bootstrap.php to disable url rewrite and remove this plugin
+		 * 2. Apply options for phpdesktop 
+		 * 3. Copy entire CakePHP directory to /tmp/<rand>/www/
+		 * 4. Remove .htaccess files
+		 * 5. Edit core.php and bootstrap.php to disable url rewrite and remove this plugin
 		 *
-		 * 5. Dump MySQL database
-		 * 6. Convert SQL to Sqlite compatible SQL
-		 * 7. Edit database.php to activate Sqlite
-		 * 8. Import database structure in Sqlite
+		 * 6. Dump MySQL database
+		 * 7. Convert SQL to Sqlite compatible SQL
+		 * 8. Edit database.php to activate Sqlite
+		 * 9. Import database structure in Sqlite
 		 *
-		 * 9. Zip package
-		 * 10. Cleanup job dir
-		 * 11. Serve package
+		 * 10. Zip package
+		 * 11. Cleanup job dir
+		 * 12. Serve package
 		 */
+		
+		//Validate method
+		if( ! $this->request->is('post') ){
+			$this->Session->setFlash(__('Invalid request'));
+			$this->redirect($this->referer());
+		}
+		
+		//Check formdata present
+		if(empty($this->request->data["Cakedesktop"])){
+			$this->Session->setFlash(__('No form data found'));
+			$this->redirect($this->referer());
+		}
+
+		$this->settings = $this->request->data["Cakedesktop"];
+		if( ! empty($this->settings['main_window']['title'])){
+			$this->applicationname = $this->settings['main_window']['title'];
+		}
 		
 		//Set values:
 		ini_set('max_execution_time', 120);
@@ -73,59 +95,35 @@ class CakedesktopController extends AppController {
 		$this->job_directory = CakePlugin::path('Cakedesktop').'tmp'.DS.$this->job_id;		
 		mkdir($this->job_directory);
 
-		//Step 1
-		$this->timerstart();
-			$this->copyskeletondir();
-		$this->timerstop("1. Copy skel dir");
+		$this->copyskeletondir();
 
-		//Step 2
-		$this->timerstart();
-			$this->copycakedir();
-		$this->timerstop("2. Copy Cake dir");
+		$this->applysettings();
 
-		//Step 3
-		$this->timerstart();
-			$this->removehtaccess();
-		$this->timerstop("3. Remove .htacces files");
+		$this->copycakedir();
 
-		//Step 4
-		$this->timerstart();
-			$this->editcore();
-		$this->timerstop("4. Edit core.php");
+		$this->removehtaccess();
 
-		//Step 5
-		$this->timerstart();
-			$this->createmysqldump();
-		$this->timerstop("5. Create mysql dump");
+		$this->editcore();
 
-		//Step 6
-		$this->timerstart();
-			$this->converttosqlite();
-		$this->timerstop("6. Convert to sqlite"); 
+		$this->createmysqldump();
 
-		//Step 7
-		$this->timerstart();
-			$this->editdatabaseconfig();
-		$this->timerstop("7. Edit databaseconfig"); 
+		$this->converttosqlite();
 
-		//Step 8
-		$this->timerstart();
-			$this->createsqlitedb();
-		$this->timerstop("8. Create sqlitedb"); 
+		$this->editdatabaseconfig();
 
-		//Step 9
-		$this->timerstart();
-			$this->zipapplication();
-		$this->timerstop("9. Zip application"); 
+		$this->createsqlitedb();
 
-		//Step 10
-		$this->timerstart();
-			$this->cleanup();
-		$this->timerstop("10. Cleanup"); 
+		$this->zipapplication();
 
-		//Step 11
+		$this->cleanup();
+
+		//Final step:
 		return $this->servezipfile();
 	}
+
+	/**
+	 * STEPS:
+	 */
 
 	/**
 	 * [copyskeletondir description]
@@ -142,6 +140,45 @@ class CakedesktopController extends AppController {
 		    'scheme' => Folder::SKIP  // Skip directories/files that already exist
 		));
 
+	}
+
+	/**
+	 * [applysettings description]
+	 * @return [type] [description]
+	 */
+	private function applysettings(){
+
+		//Rework settings:
+		$this->settings = $this->fixboolean($this->settings);
+
+		var_dump($this->settings);
+		exit;
+
+		//Rename application exe to title if avail
+		if( ! empty($this->applicationname)){
+			rename($this->job_directory.DS.'phpdesktop-chrome.exe', $this->job_directory.DS.Inflector::slug($this->applicationname).'.exe');
+		}
+
+		$settingsfile = $this->job_directory.DS.'settings.json';
+
+		//Read settings.json
+		if( ! is_readable($settingsfile)){
+			return false;
+		}
+
+		$currentsettings = json_decode(file_get_contents($settingsfile),true); //Create assoc array
+
+		//Merge the settings
+		$newsettings = array_merge($currentsettings,$this->settings);
+
+		//Prettyprint if PHP version supports it
+		if( phpversion() >= 5.4 ){
+			$newsettings = json_encode($newsettings,JSON_PRETTY_PRINT);
+		}else{
+			$newsettings = json_encode($newsettings);
+		}
+		
+		return file_put_contents($settingsfile, $newsettings);
 	}
 
 	/**
@@ -303,7 +340,7 @@ EOD;
 	 */
 	private function zipapplication(){
 
-		$this->zipfile = CakePlugin::path('Cakedesktop').'tmp'.DS.'desktopapplication.zip';
+		$this->zipfile = CakePlugin::path('Cakedesktop').'tmp'.DS.Inflector::slug($this->applicationname).'.zip';
 
 		//Cleanup:
 		if(file_exists($this->zipfile) ){
@@ -378,7 +415,7 @@ EOD;
 
 		$this->response->file(
 		    $this->zipfile,
-		    array('download' => true, 'name' => 'desktopapplication.zip')
+		    array('download' => true, 'name' => Inflector::slug($this->applicationname).'.zip')
 		);
 
 
@@ -386,23 +423,27 @@ EOD;
 	}
 
 
-
-
-
-
-	/*
-	TMP FUNCTIONS ==============================================================
+	/**
+	 * Aux functions
 	 */
-
-	function timerstart(){
-		$this->starttime = time();
-	}
 	
-	function timerstop($msg = ''){
+	private function fixboolean($array){
 
-		$time = time() - $this->starttime;
+		if (!is_array($array)) {
+			if( $array == '1'){
+				return true;
+			}else if( $array == '0'){
+				return false;
+			}
+			return $array;
+		}
 
-		echo "<pre>$msg | Time: $time s</pre>";
+		$newArray = array();
+
+		foreach ($array as $key => $value) {
+			$newArray[$key] = $this->fixboolean($value);
+		}
+
+		return $newArray;
 	}
-	
 }
