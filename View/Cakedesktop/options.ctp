@@ -2,7 +2,7 @@
 .cakedesktop_floatleft{
 	float:left;
 	padding:5px;
-	border-left: 1px solid grey;
+	border-left: 1px solid #CCCCB2;
 }
 .cakedesktop_fieldset{
 	padding-bottom: 10px;
@@ -47,7 +47,7 @@ echo $this->Form->create('Cakedesktop',array(
 		echo '</fieldset>';
 
 	echo $this->Form->button(__('Create desktop app'),array('id'=>'createdesktopapplink','type'=>'submit'));
-	
+
 echo $this->Form->end();
 ?>
 
