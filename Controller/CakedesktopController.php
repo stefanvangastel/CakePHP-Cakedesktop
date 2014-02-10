@@ -54,6 +54,12 @@ class CakedesktopController extends AppController {
 			$this->redirect($this->referer());
 		}
 
+		//Check tmp is_writable
+		if( ! is_writable(CakePlugin::path('Cakedesktop').'tmp'.DS)){
+			$this->Session->setFlash(__('%s is not writable. This directory must be writable by webserver user.',CakePlugin::path('Cakedesktop').'tmp'.DS));
+			$this->redirect($this->referer());
+		}
+
 		//CakePHP version
 		if( is_readable(CAKE.'version.txt') ){
 			$versionfile = file(CAKE.'version.txt');
