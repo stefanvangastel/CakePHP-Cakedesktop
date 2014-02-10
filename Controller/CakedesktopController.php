@@ -237,13 +237,41 @@ class CakedesktopController extends AppController {
 	private function copycakedir(){
 
 		$folder = new Folder($this->job_directory);
-		return $folder->copy(array(
+		$copyaction = $folder->copy(array(
 		    'from' => ROOT, // will cause a cd() to occur
 		    'to' => $this->job_directory.DS.'www',
 		    'mode' => 0755,
 		    'skip' => array('Cakedesktop', '.git'),
 		    'scheme' => Folder::OVERWRITE  // Skip directories/files that already exist
 		));
+
+		//Copy loaded plugin assets if any
+		$loadedplugins = CakePlugin::loaded();
+		foreach($loadedplugins as $pluginname){
+
+			if($pluginname == 'Cakedesktop'){
+				continue; //Skip this plugin
+			}
+
+			//Set path
+			$pluginwebrootpath = CakePlugin::path($pluginname).'webroot'.DS;
+			
+			if(file_exists($pluginwebrootpath)){
+				//New base path
+				$newpath = $this->job_directory.DS.'www'.DS.'app'.DS.'webroot'.DS;
+
+				$folder = new Folder($newpath);
+				$copyaction = $folder->copy(array(
+				    'from' => $pluginwebrootpath, // will cause a cd() to occur
+				    'to' => $newpath.Inflector::underscore($pluginname).DS,
+				    'mode' => 0755,
+				    'scheme' => Folder::OVERWRITE  // Skip directories/files that already exist
+				));
+
+			}
+		}
+
+		return true;
 		
 	}
 
