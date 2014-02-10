@@ -389,7 +389,7 @@ EOD;
 	 */
 	private function zipapplication(){
 
-		$this->zipfile = CakePlugin::path('Cakedesktop').'tmp'.DS.Inflector::slug($this->applicationname).'.zip';
+		$this->zipfile = CakePlugin::path('Cakedesktop').'tmp'.DS.'desktopapplication.zip'; //Always save as same name to prevent stacking of data
 
 		//Cleanup:
 		if(file_exists($this->zipfile) ){
@@ -464,9 +464,8 @@ EOD;
 
 		$this->response->file(
 		    $this->zipfile,
-		    array('download' => true, 'name' => Inflector::slug($this->applicationname).'.zip')
+		    array('download' => true, 'name' => Inflector::slug($this->applicationname).'.zip') //Serve as given name
 		);
-
 
 		return $this->response;
 	}

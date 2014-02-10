@@ -54,8 +54,10 @@ echo $this->Form->end();
 
 <script>
 function onSubmit(){
-	document.getElementById("createdesktopapplink").innerHTML="Cakedesktop is creating your offline Windows Desktop application, please wait.<br />This can take up to a few minutes, refresh page afterwards to create a new application.";
-	document.getElementById("createdesktopapplink").setAttribute('disabled','disabled');
+	var submitbutton = document.getElementById("createdesktopapplink");
+	
+	submitbutton.innerHTML="Cakedesktop is creating your offline Windows Desktop application, please wait.<br />This can take up to a few minutes, refresh page afterwards to create a new application.";
+	submitbutton.setAttribute('disabled','disabled');
     return true;
 };
 </script>
