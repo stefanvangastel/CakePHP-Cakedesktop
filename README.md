@@ -10,18 +10,19 @@ CakePHP-Cakedesktop
 <a name="intro"/>
 ## Intro
 
-Download a complete CakePHP webapplication as a full standalone Windows desktop application. Configure the packaged application to your needs before creating it. The aim is to supply a pure PHP application packager, therefore no shellscripts or exec() functions are used.
+Download a complete CakePHP webapplication as a full standalone Windows (XP, 7 or 8) desktop application. Configure the packaged application to your needs before creating it using the simple webinterface. The aim is to supply a pure PHP application packager, therefore no shellscripts or exec() functions are used.
 
 This plugin is in development. Some things like the MySQL to Sqlite database conversion may need work.
 
-The [phpdesktop](https://code.google.com/p/phpdesktop/) project is used to provide the standalone Windows enviroment. The Chrome-driven variant is used for this plugin.
+The awesome [phpdesktop](https://code.google.com/p/phpdesktop/) project is used to provide the standalone Windows enviroment. The Chrome-driven variant is used for this plugin.
 
 <a name="requirements"/>
 ## Requirements
 
  * CakePHP >= 2.3
- * php-sqlite3
- * MySQL datasource as
+ * php-sqlite3 extension
+ * MySQL datasource for current webapplication (More datasource support comming)
+ * No assets (CSS & JS) loaded from plugins (Working on this)
 
  The packaged application is running a Mongoose webserver, PHP 5.4 and uses Chrome to view the app. (Read more about this on the phpdesktop website). Currently using the 5.4 variant to keep Windows XP compatible.
 
