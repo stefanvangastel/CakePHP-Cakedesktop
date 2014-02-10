@@ -14,14 +14,15 @@ echo $this->Form->create('Cakedesktop',array(
 	'url'=>array('plugin'=>'cakedesktop','controller'=>'cakedesktop','action'=>'createdesktopapp'),
 	'inputDefaults' => array(
 	        'div' => 'cakedesktop_floatleft'
-	    )
+	    ),
+	'onsubmit'=>'onSubmit()'
 	)
 );
 
 		//Main window
 		echo '<fieldset class="cakedesktop_fieldset">';
     	echo '<legend>'.__('Main window').'</legend>';
-    		echo $this->Form->input('Cakedesktop.main_window.title',array('label'=>__('Application title'),'div'=>true));
+    		echo $this->Form->input('Cakedesktop.main_window.title',array('label'=>__('Application title'),'div'=>true,'required'=>'required'));
 			echo $this->Form->input('Cakedesktop.main_window.start_maximized',array('type'=>'checkbox','label'=>__('Start application maximized?'),'default'=>true));
 			echo $this->Form->input('Cakedesktop.main_window.start_fullscreen',array('type'=>'checkbox','label'=>__('Start fullscreen?')));
 			echo $this->Form->input('Cakedesktop.main_window.disable_maximize_button',array('type'=>'checkbox','label'=>__('Disable maximize button?')));
@@ -52,8 +53,9 @@ echo $this->Form->end();
 ?>
 
 <script>
-document.getElementById("createdesktopapplink").onclick = function() {
-	document.getElementById("createdesktopapplink").innerHTML="Cakedesktop is creating your offline Windows Desktop application, please wait. This can take up to a few minutes.";
+function onSubmit(){
+	document.getElementById("createdesktopapplink").innerHTML="Cakedesktop is creating your offline Windows Desktop application, please wait.<br />This can take up to a few minutes, refresh page afterwards to create a new application.";
+	document.getElementById("createdesktopapplink").setAttribute('disabled','disabled');
     return true;
 };
 </script>
