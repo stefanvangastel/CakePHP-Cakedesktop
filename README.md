@@ -53,6 +53,5 @@ The [phpdesktop](https://code.google.com/p/phpdesktop/) project is used to provi
 
 Open http(s)://yourapp.com/cakedesktop/ and create your application!
 
-The application is served as a zip file containing all you need to run your application
-
+The application is served as a zip file containing all the stuff you need to run your application. Extract the contents and run the .exe file provided.
 
