@@ -24,7 +24,7 @@ The awesome [phpdesktop](https://code.google.com/p/phpdesktop/) project is used 
  * MySQL datasource for current webapplication (More datasource support comming)
  * No assets (CSS & JS) loaded from plugins (Working on this)
 
- The packaged application is running a Mongoose webserver, PHP 5.4 and uses Chrome to view the app. (Read more about this on the phpdesktop website). Currently using the 5.4 variant to keep Windows XP compatible.
+The packaged application is running a Mongoose webserver, PHP 5.4 and uses Chrome to view the app. (Read more about this on the phpdesktop website). Currently using the 5.4 variant to keep Windows XP compatible.
 
 <a name="installation"/>
 ## Installation and Setup
