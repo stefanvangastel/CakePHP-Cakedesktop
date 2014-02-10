@@ -33,7 +33,7 @@ class CakedesktopController extends AppController {
 	}
 
 	/**
-	 * [options description]
+	 * This functions shows an options screen so the user can configure the application that is packaged
 	 * @return [type] [description]
 	 */
 	public function options(){	
