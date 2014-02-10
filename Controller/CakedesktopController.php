@@ -44,6 +44,17 @@ class CakedesktopController extends AppController {
 			$this->redirect($this->referer());
 		}
 
+		//Check datassource:
+		//Get current database name:
+		App::uses('ConnectionManager', 'Model');
+		$dataSource = ConnectionManager::getDataSource('default');
+		$driver = $dataSource->config['datasource'];
+		if( ! stristr($driver, 'mysql')){
+			$this->Session->setFlash(__('Currently only MySQL datasources are supported.'));
+			$this->redirect($this->referer());
+		}
+
+		//CakePHP version
 		if( is_readable(CAKE.'version.txt') ){
 			$versionfile = file(CAKE.'version.txt');
 			$version = $versionfile[count($versionfile)-1];
