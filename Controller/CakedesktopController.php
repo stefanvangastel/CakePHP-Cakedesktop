@@ -45,21 +45,21 @@ class CakedesktopController extends AppController {
 			$this->redirect($this->referer());
 		}
 
-	/*	if( is_readable(CAKE.'version.txt') ){
+		if( is_readable(CAKE.'version.txt') ){
 			$versionfile = file(CAKE.'version.txt');
 			$version = $versionfile[count($versionfile)-1];
 
-			$version = "5.1.3";
+			$version = "2.1.3";
 
 			list($major,$minor,$patch) = explode('.', $version);
 
-			if(! ($major.'.'.$minor >= 2.3 ) ){
-				$this->Session->setFlash(__('Warning: You appear to be using CakePHP %s.%s . CakePHP >= 2.3 is required.',$major,$minor));
+			if(! ("$major.$minor" >= 2.3 ) ){
+				$this->Session->setFlash(__('Warning: You appear to be using CakePHP %s.%s.%s . CakePHP >= 2.3.x is required.',$major,$minor,$patch));
 			}
 
 		}else{
-			$this->Session->setFlash(__('Warning: Could not determine CakePHP version. CakePHP >= 2.3 is required.'));
-		}*/
+			$this->Session->setFlash(__('Warning: Could not determine CakePHP version. CakePHP >= 2.3.x is required.'));
+		}
 
 	}
 
