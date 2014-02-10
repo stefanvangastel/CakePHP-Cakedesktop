@@ -10,7 +10,11 @@ CakePHP-Cakedesktop
 <a name="intro"/>
 ## Intro
 
-Download full CakePHP webapplication as a full standalone Windows desktop application. Configure the packaged application to your needs before creating it.
+Download a complete CakePHP webapplication as a full standalone Windows desktop application. Configure the packaged application to your needs before creating it. The aim is to supply a pure PHP application packager, therefore no shellscripts or exec() functions are used.
+
+This plugin is in development. Some things like the MySQL to Sqlite database conversion may need work.
+
+The [phpdesktop](https://code.google.com/p/phpdesktop/) project is used to provide the standalone Windows enviroment. The Chrome-driven variant is used for this plugin.
 
 <a name="requirements"/>
 ## Requirements
