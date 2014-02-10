@@ -36,8 +36,7 @@ class CakedesktopController extends AppController {
 	 * [options description]
 	 * @return [type] [description]
 	 */
-	public function options(){
-		//Render options view
+	public function options(){	
 		
 		//Check deps:
 		if( ! extension_loaded('sqlite3') ){
@@ -171,33 +170,48 @@ class CakedesktopController extends AppController {
 	 */
 	private function applysettings(){
 
-		//Rework settings:
-		$this->settings = $this->fixboolean($this->settings);
+		/*
+			Rename application exe to title if avail
+		 */
+			if( ! empty($this->applicationname)){
+				rename($this->job_directory.DS.'phpdesktop-chrome.exe', $this->job_directory.DS.Inflector::slug($this->applicationname).'.exe');
+			}
 
-		//Rename application exe to title if avail
-		if( ! empty($this->applicationname)){
-			rename($this->job_directory.DS.'phpdesktop-chrome.exe', $this->job_directory.DS.Inflector::slug($this->applicationname).'.exe');
-		}
+		/*
+			Set favicon if any in webroot
+		 */
+			if(is_readable(WWW_ROOT.'favicon.ico')){
+				rename(WWW_ROOT.'favicon.ico', $this->job_directory.DS.'favicon.ico');
+				$this->settings['main_window']['icon'] = 'favicon.ico';
+			}
 
-		$settingsfile = $this->job_directory.DS.'settings.json';
 
-		//Read settings.json
-		if( ! is_readable($settingsfile)){
-			return false;
-		}
+		/*
+			Apply settings (final step)
+		 */
+			//Rework settings:
+			$this->settings = $this->fixboolean($this->settings);
 
-		$currentsettings = json_decode(file_get_contents($settingsfile),true); //Create assoc array
+			$settingsfile = $this->job_directory.DS.'settings.json';
 
-		//Merge the settings
-		$newsettings = array_merge($currentsettings,$this->settings);
+			//Read settings.json
+			if( ! is_readable($settingsfile)){
+				return false;
+			}
 
-		//Prettyprint if PHP version supports it
-		if( phpversion() >= 5.4 ){
-			$newsettings = json_encode($newsettings,JSON_PRETTY_PRINT);
-		}else{
-			$newsettings = json_encode($newsettings);
-		}
+			$currentsettings = json_decode(file_get_contents($settingsfile),true); //Create assoc array
+
+			//Merge the settings
+			$newsettings = array_merge($currentsettings,$this->settings);
+
+			//Prettyprint if PHP version supports it
+			if( phpversion() >= 5.4 ){
+				$newsettings = json_encode($newsettings,JSON_PRETTY_PRINT);
+			}else{
+				$newsettings = json_encode($newsettings);
+			}
 		
+		//Write new settingsfile
 		return file_put_contents($settingsfile, $newsettings);
 	}
 
