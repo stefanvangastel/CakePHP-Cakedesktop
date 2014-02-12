@@ -173,7 +173,7 @@ class CakedesktopController extends AppController {
 		    'from' => CakePlugin::path('Cakedesktop').'Vendor'.DS.'phpdesktop', // will cause a cd() to occur
 		    'to' => $this->job_directory,
 		    'mode' => 0755,
-		    'skip' => array('Cakedesktop', '.git'),
+		    'skip' => array('Cakedesktop', '.git','.svn'),
 		    'scheme' => Folder::SKIP  // Skip directories/files that already exist
 		));
 
