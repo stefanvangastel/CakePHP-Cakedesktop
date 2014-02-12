@@ -61,8 +61,8 @@ class CakedesktopController extends AppController {
 		}
 
 		//CakePHP version
-		if( is_readable(CAKE.'version.txt') ){
-			$versionfile = file(CAKE.'version.txt');
+		if( is_readable(CAKE.'VERSION.txt') ){
+			$versionfile = file(CAKE.'VERSION.txt');
 			$version = $versionfile[count($versionfile)-1];
 
 			list($major,$minor,$patch) = explode('.', $version);
