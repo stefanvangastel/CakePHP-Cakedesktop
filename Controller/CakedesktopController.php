@@ -37,7 +37,8 @@ class CakedesktopController extends AppController {
 	 * @return [type] [description]
 	 */
 	public function options(){	
-		
+
+
 		//Check deps:
 		if( ! extension_loaded('sqlite3') ){
 			$this->Session->setFlash(__('Cakedesktop requires Sqlite3 to be installed.'));
@@ -73,6 +74,17 @@ class CakedesktopController extends AppController {
 
 		}else{
 			$this->Session->setFlash(__('Warning: Could not determine CakePHP version. CakePHP >= 2.3.x is required.'));
+		}
+
+		//Try and read user
+		//EXPERIMENTAL
+		if($username = `whoami`){
+			//Explode on \ to get rid of domain
+			if(stristr($username, '\\')){
+				list($domain,$username) = explode('\\', $username);
+ 			}
+
+ 			$this->set('username',trim($username));
 		}
 
 	}
@@ -134,9 +146,9 @@ class CakedesktopController extends AppController {
 
 		$this->copyskeletondir();
 
-		$this->applysettings();
-
 		$this->copycakedir();
+
+		$this->applysettings();
 
 		$this->removehtaccess();
 
@@ -180,57 +192,6 @@ class CakedesktopController extends AppController {
 	}
 
 	/**
-	 * [applysettings description]
-	 * @return [type] [description]
-	 */
-	private function applysettings(){
-
-		/*
-			Rename application exe to title if avail
-		 */
-			if( ! empty($this->applicationname)){
-				rename($this->job_directory.DS.'phpdesktop-chrome.exe', $this->job_directory.DS.Inflector::slug($this->applicationname).'.exe');
-			}
-
-		/*
-			Set favicon if any in webroot
-		 */
-			if(is_readable(WWW_ROOT.'favicon.ico')){
-				rename(WWW_ROOT.'favicon.ico', $this->job_directory.DS.'favicon.ico');
-				$this->settings['main_window']['icon'] = 'favicon.ico';
-			}
-
-
-		/*
-			Apply settings (final step)
-		 */
-			//Rework settings:
-			$this->settings = $this->fixboolean($this->settings);
-
-			$settingsfile = $this->job_directory.DS.'settings.json';
-
-			//Read settings.json
-			if( ! is_readable($settingsfile)){
-				return false;
-			}
-
-			$currentsettings = json_decode(file_get_contents($settingsfile),true); //Create assoc array
-
-			//Merge the settings
-			$newsettings = array_merge($currentsettings,$this->settings);
-
-			//Prettyprint if PHP version supports it
-			if( phpversion() >= 5.4 ){
-				$newsettings = json_encode($newsettings,JSON_PRETTY_PRINT);
-			}else{
-				$newsettings = json_encode($newsettings);
-			}
-		
-		//Write new settingsfile
-		return file_put_contents($settingsfile, $newsettings);
-	}
-
-	/**
 	 * [copycakedir description]
 	 * @return bool Result of this action
 	 */
@@ -271,8 +232,85 @@ class CakedesktopController extends AppController {
 			}
 		}
 
-		return true;
+		return true;		
+	}
+
+	/**
+	 * [applysettings description]
+	 * @return [type] [description]
+	 */
+	private function applysettings(){
+
+		/*
+			Rename application exe to title if avail
+		 */
+			if( ! empty($this->applicationname)){
+				rename($this->job_directory.DS.'phpdesktop-chrome.exe', $this->job_directory.DS.Inflector::slug($this->applicationname).'.exe');
+			}
+
+		/*
+			Set favicon if any in webroot
+		 */
+			if(is_readable(WWW_ROOT.'favicon.ico')){
+				rename(WWW_ROOT.'favicon.ico', $this->job_directory.DS.'favicon.ico');
+				$this->settings['main_window']['icon'] = 'favicon.ico';
+			}
+
+		/*
+			Check spoof webserver user setting
+		 */
+			if($this->settings['webserver']['spoofremoteuser']){
+				
+				$spoofcode = <<<'EOD'
+<?php 
+if($username = `whoami`){
+	if(stristr($username, '\\')){
+		list($domain,$username) = explode('\\', $username);
+	}
+	if(!empty($username)){
+		$_SERVER['REMOTE_USER']=trim($username);
+	}	
+}
+EOD;
+
+				$indexfile = $this->job_directory.DS.'www'.DS.'app'.DS.'webroot'.DS.'index.php';
+
+				if($indexfilecontent = file($indexfile)){
+					$indexfilecontent[0] = $spoofcode;
+					$indexfilecontent = implode("", $indexfilecontent);
+					file_put_contents($indexfile, $indexfilecontent);
+				}
+
+			}
+			unset($this->settings['webserver']['spoofremoteuser']);
+
+		/*
+			Apply settings (final step)
+		 */
+			//Rework settings:
+			$this->settings = $this->fixboolean($this->settings);
+
+			$settingsfile = $this->job_directory.DS.'settings.json';
+
+			//Read settings.json
+			if( ! is_readable($settingsfile)){
+				return false;
+			}
+
+			$currentsettings = json_decode(file_get_contents($settingsfile),true); //Create assoc array
+
+			//Merge the settings
+			$newsettings = array_merge($currentsettings,$this->settings);
+
+			//Prettyprint if PHP version supports it
+			if( phpversion() >= 5.4 ){
+				$newsettings = json_encode($newsettings,JSON_PRETTY_PRINT);
+			}else{
+				$newsettings = json_encode($newsettings);
+			}
 		
+		//Write new settingsfile
+		return file_put_contents($settingsfile, $newsettings);
 	}
 
 	/**
