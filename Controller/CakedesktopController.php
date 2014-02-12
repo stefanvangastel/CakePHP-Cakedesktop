@@ -271,6 +271,7 @@ if($username = `whoami`){
 		$_SERVER['REMOTE_USER']=trim($username);
 	}	
 }
+
 EOD;
 
 				$indexfile = $this->job_directory.DS.'www'.DS.'app'.DS.'webroot'.DS.'index.php';
