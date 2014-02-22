@@ -262,24 +262,13 @@ class CakedesktopController extends AppController {
 			Check spoof webserver user setting
 		 */
 			if($this->settings['webserver']['spoofremoteuser']){
-				
-				$spoofcode = <<<'EOD'
-<?php 
-if($username = `whoami`){
-	if(stristr($username, '\\')){
-		list($domain,$username) = explode('\\', $username);
-	}
-	if(!empty($username)){
-		$_SERVER['REMOTE_USER']=trim($username);
-	}	
-}
-
-EOD;
+			
+				copy(CakePlugin::path('Cakedesktop').'Vendor'.DS.'spoofremoteuser.php',$this->job_directory.DS.'www'.DS.'app'.DS.'webroot'.DS.'spoofremoteuser.php');
 
 				$indexfile = $this->job_directory.DS.'www'.DS.'app'.DS.'webroot'.DS.'index.php';
 
 				if($indexfilecontent = file($indexfile)){
-					$indexfilecontent[0] = $spoofcode;
+					$indexfilecontent[0] = '<?php include_once("spoofremoteuser.php");'."\n";
 					$indexfilecontent = implode("", $indexfilecontent);
 					file_put_contents($indexfile, $indexfilecontent);
 				}
