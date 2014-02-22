@@ -100,19 +100,20 @@ class CakedesktopController extends AppController {
 		 * 0. Retrieve options and verify post 
 		 * 
 		 * 1. Copy phpdesktop skeleton dir to /tmp/<rand>
-		 * 2. Apply options for phpdesktop 
-		 * 3. Copy entire CakePHP directory to /tmp/<rand>/www/
-		 * 4. Remove .htaccess files
-		 * 5. Edit core.php and bootstrap.php to disable url rewrite and remove this plugin
+		 * 2. Copy entire CakePHP directory to /tmp/<rand>/www/
+		 * 3. Apply options for phpdesktop 
+		 * 4. Copy loaded php extensions to new php.ini
+		 * 5. Remove .htaccess files
+		 * 6. Edit core.php and bootstrap.php to disable url rewrite and remove this plugin
 		 *
-		 * 6. Dump MySQL database
-		 * 7. Convert SQL to Sqlite compatible SQL
-		 * 8. Edit database.php to activate Sqlite
-		 * 9. Import database structure in Sqlite
+		 * 7. Dump MySQL database
+		 * 8. Convert SQL to Sqlite compatible SQL
+		 * 9. Edit database.php to activate Sqlite
+		 * 10. Import database structure in Sqlite
 		 *
-		 * 10. Zip package
-		 * 11. Cleanup job dir
-		 * 12. Serve package
+		 * 11. Zip package
+		 * 12. Cleanup job dir
+		 * 13. Serve package
 		 */
 		
 		//Validate method
@@ -138,7 +139,6 @@ class CakedesktopController extends AppController {
 
 		//Create job_id
 		$this->job_id = time().'_'.rand(1000,9999);
-		//$this->job_id = '1234'; //DEV TMP
 
 		//Create job directory
 		$this->job_directory = CakePlugin::path('Cakedesktop').'tmp'.DS.$this->job_id;		
@@ -149,6 +149,8 @@ class CakedesktopController extends AppController {
 		$this->copycakedir();
 
 		$this->applysettings();
+
+		$this->copyphploadedextensions();
 
 		$this->removehtaccess();
 
@@ -312,6 +314,44 @@ EOD;
 		
 		//Write new settingsfile
 		return file_put_contents($settingsfile, $newsettings);
+	}
+
+	/**
+	 * Copies loaded PHP extenions to new php.ini file of generated application (if available)
+	 * @return [type] [description]
+	 */
+	public function copyphploadedextensions(){
+
+		//Get loaded php extensions:
+		$extensions = get_loaded_extensions();
+
+		//Get php dir of phpdesktop project
+		$phpdesktop_extensionsdir = $this->job_directory.DS.'php'.DS;
+
+		//Application ini file
+		$phpinifile = $phpdesktop_extensionsdir.'php.ini';
+
+		//Read ini file of created application
+		$phpinifile_content = file($phpinifile); //TMPTMPTMP
+
+		$phpinifile_content[]= PHP_EOL.PHP_EOL.";Extensions added by Cakedesktop:".PHP_EOL.PHP_EOL;
+ 
+		//For each of the loaded extensions on this webserver try to add them to the php.ini file of the created application if they exists.
+		foreach($extensions as $extension){
+
+			//Get dll name
+			$dllname = 'php_'.strtolower($extension).'.dll';
+
+			if(file_exists($phpdesktop_extensionsdir.$dllname)){
+				
+				if( ! in_array('extension='.$dllname, $phpinifile_content) ){
+					$phpinifile_content[]='extension='.$dllname.PHP_EOL;
+				}
+			}
+		}
+
+		//Write new ini file
+		return file_put_contents($phpinifile, implode('',$phpinifile_content));
 	}
 
 	/**
