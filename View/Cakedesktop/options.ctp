@@ -54,11 +54,8 @@ echo $this->Form->create('Cakedesktop',array(
 		echo '<legend>'.__('Misc').'</legend>';
 			echo $this->Form->input('Cakedesktop.webserver.spoofremoteuser',array('type'=>'checkbox','label'=>__('Spoof webserver remote_user variable?'),'default'=>false));
 			echo '<i>';
-				echo __('This option can be used if your webapplication is using a form of SSO like Kerberos of LDAP authentication.');
-				if(!empty($username)){
-					echo '<br />'.__('E.g. the current (webserver) user is: <b>%s</b>.',$username);
-				}
-				echo '<br />'.__('The app/webroot/index.php file will be prepended with a line to set the $_SERVER["REMOTE_USER"] variable.');
+				echo __('This option can be used if your webapplication is using a something like Kerberos of LDAP authentication.');
+				echo '<br />'.__('The app/webroot/index.php file will be prepended with a line to set the $_SERVER["REMOTE_USER"] variable to the users FQDN (account@DOMAIN.EXT).');
 				
 			echo '</i>';
 		echo '</fieldset>';
