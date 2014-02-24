@@ -18,6 +18,7 @@ Some key features:
  * MySQL database is converted to local Sqlite database
  * Loaded Php extensions on webserver are also loaded in generated applications php.ini (if available) for maximized compatibility
  * Plugin assets (js and css) are also used correctly. You application will look, feel and work extactly like you webapplication.
+ * Webserver REMOTE_USER spoof option. If you run the dekstop application on a Windows system with a domain user logged in, the application can set that user as the REMOTE_USER. This is very nice if your applications authentication is based on this server variable. (e.g. Kerberos or LDAP auth)
 
 This plugin is in development. Some things like the MySQL to Sqlite database conversion may need work.
 
