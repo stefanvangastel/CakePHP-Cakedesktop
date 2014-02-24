@@ -12,6 +12,13 @@ CakePHP-Cakedesktop
 
 Download a complete CakePHP webapplication as a full standalone Windows (XP, 7 or 8) desktop application. Configure the packaged application to your needs before creating it using the simple webinterface. The aim is to supply a pure PHP application packager, therefore no shellscripts or exec() functions are used.
 
+Some key features:
+
+ * Generated applications settings are customizable via webinterface
+ * MySQL database is converted to local Sqlite database
+ * Loaded Php extensions on webserver are also loaded in generated applications php.ini (if available) for maximized compatibility
+ * Plugin assets (js and css) are also used correctly. You application will look, feel and work extactly like you webapplication.
+
 This plugin is in development. Some things like the MySQL to Sqlite database conversion may need work.
 
 The awesome [phpdesktop](https://code.google.com/p/phpdesktop/) project is used to provide the standalone Windows enviroment. The Chrome-driven variant is used for this plugin.
@@ -24,7 +31,7 @@ The awesome [phpdesktop](https://code.google.com/p/phpdesktop/) project is used 
  * MySQL datasource for current webapplication (More datasource support comming)
  * Plugin assets are included
 
-The packaged application is running a Mongoose webserver, PHP 5.4 and uses Chrome to view the app. (Read more about this on the phpdesktop website). Currently using the 5.4 variant to keep Windows XP compatible.
+The packaged application is running a Mongoose webserver, PHP 5.4 and uses Chromium (Chromium Emebeded Framework) to view the app. Read more about this on the phpdesktop website. Currently using the 5.4 version to keep Windows XP compatible.
 
 <a name="installation"/>
 ## Installation and Setup
@@ -55,4 +62,3 @@ The packaged application is running a Mongoose webserver, PHP 5.4 and uses Chrom
 Open http(s)://yourapp.com/cakedesktop/ and create your application!
 
 The application is served as a zip file containing all the stuff you need to run your application. Extract the contents and run the .exe file provided.
-
